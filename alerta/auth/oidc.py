@@ -89,11 +89,11 @@ def openid():
 
     if preferred_token_auth_method == 'client_secret_basic':
         auth = (request.json['clientId'], current_app.config['OAUTH2_CLIENT_SECRET'])
-        r = requests.post(token_endpoint, data, auth=auth)
+        r = requests.post(token_endpoint, data, auth=auth, timeout=60)
     elif preferred_token_auth_method == 'client_secret_post':
         data['client_id'] = request.json['clientId']
         data['client_secret'] = current_app.config['OAUTH2_CLIENT_SECRET']
-        r = requests.post(token_endpoint, data)
+        r = requests.post(token_endpoint, data, timeout=60)
     elif preferred_token_auth_method == 'client_secret_jwt':
         now = datetime.utcnow()
         payload = dict(
@@ -111,7 +111,7 @@ def openid():
         )
         data['client_assertion_type'] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         data['client_assertion'] = client_assertion
-        r = requests.post(token_endpoint, data)
+        r = requests.post(token_endpoint, data, timeout=60)
     else:
         raise ApiError(f"Token endpoint auth method '{preferred_token_auth_method}' is not supported by Alerta.", 400)
     token = r.json()
@@ -142,7 +142,7 @@ def openid():
 
     try:
         headers = {'Authorization': f"{token.get('token_type', 'Bearer')} {token['access_token']}"}
-        r = requests.get(userinfo_endpoint, headers=headers)
+        r = requests.get(userinfo_endpoint, headers=headers, timeout=60)
         userinfo = r.json()
     except Exception:
         raise ApiError('No access token in OpenID Connect token response.')
