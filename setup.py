@@ -53,6 +53,7 @@ setuptools.setup(
         'requests',
         'requests-hawk',
         'sentry-sdk[flask]>=0.10.2',
+        "security==1.2.1",
     ],
     extras_require={
         'mongodb': ['pymongo>=3.9.0,<4.0'],

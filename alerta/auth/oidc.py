@@ -15,6 +15,7 @@ from alerta.models.user import User
 from alerta.utils.audit import auth_audit_trail
 
 from . import auth
+from security import safe_requests
 
 
 def get_oidc_configuration(app):
@@ -33,7 +34,7 @@ def get_oidc_configuration(app):
     discovery_doc_url = issuer_url.strip('/') + '/.well-known/openid-configuration'
 
     try:
-        r = requests.get(discovery_doc_url, timeout=2)
+        r = safe_requests.get(discovery_doc_url, timeout=2)
         config = r.json()
     except Exception as e:
         raise ApiError(f'Could not get OpenID configuration from well known URL: {str(e)}', 503)
@@ -48,7 +49,7 @@ def get_oidc_configuration(app):
     if app.config['OIDC_VERIFY_TOKEN']:
         try:
             jwks_uri = config['jwks_uri']
-            r = requests.get(jwks_uri, timeout=2)
+            r = safe_requests.get(jwks_uri, timeout=2)
             keys = {k['kid']: RSAAlgorithm.from_jwk(json.dumps(k)) for k in r.json()['keys']}
         except Exception as e:
             raise ApiError(f'Could not get OpenID JWT Key Set from JWKS URL: {str(e)}', 503)
@@ -142,7 +143,7 @@ def openid():
 
     try:
         headers = {'Authorization': f"{token.get('token_type', 'Bearer')} {token['access_token']}"}
-        r = requests.get(userinfo_endpoint, headers=headers)
+        r = safe_requests.get(userinfo_endpoint, headers=headers)
         userinfo = r.json()
     except Exception:
         raise ApiError('No access token in OpenID Connect token response.')
