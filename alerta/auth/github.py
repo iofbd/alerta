@@ -34,20 +34,20 @@ def github():
         'client_id': request.json['clientId'],
         'client_secret': client_secret,
     }
-    r = requests.post(token_endpoint, data, headers={'Accept': 'application/json'})
+    r = requests.post(token_endpoint, data, headers={'Accept': 'application/json'}, timeout=60)
     token = r.json()
 
     try:
         headers = {'Authorization': f"token {token['access_token']}"}
-        r = requests.get(github_api_url + '/user', headers=headers)
+        r = requests.get(github_api_url + '/user', headers=headers, timeout=60)
         profile = r.json()
     except Exception:
         raise ApiError('No access token in OpenID Connect token response.')
 
-    r = requests.get(github_api_url + '/user/teams', headers=headers)  # list public and private Github orgs
+    r = requests.get(github_api_url + '/user/teams', headers=headers, timeout=60)  # list public and private Github orgs
     profile['teams'] = [f"{t['organization']['login']}/{t['slug']}" for t in r.json()]
 
-    r = requests.get(github_api_url + '/user/orgs', headers=headers)  # list public and private Github orgs
+    r = requests.get(github_api_url + '/user/orgs', headers=headers, timeout=60)  # list public and private Github orgs
     profile['organizations'] = [o['login'] for o in r.json()]
 
     subject = str(profile['id'])
