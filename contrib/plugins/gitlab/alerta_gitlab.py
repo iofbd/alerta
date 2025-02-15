@@ -37,7 +37,7 @@ class GitlabIssue(PluginBase):
         if action == 'createIssue':
             if 'issue_iid' not in alert.attributes:
                 url = BASE_URL + '/issues?title=' + alert.text
-                r = requests.post(url, headers=self.headers)
+                r = requests.post(url, headers=self.headers, timeout=60)
 
                 alert.attributes['issue_iid'] = r.json().get('iid', None)
                 alert.attributes['gitlabUrl'] = '<a href="{}" target="_blank">Issue #{}</a>'.format(
@@ -50,6 +50,6 @@ class GitlabIssue(PluginBase):
                 issue_iid = alert.attributes['issue_iid']
                 body = 'Update: ' + alert.text
                 url = BASE_URL + '/issues/{}/discussions?body={}'.format(issue_iid, body)
-                r = requests.post(url, headers=self.headers)
+                r = requests.post(url, headers=self.headers, timeout=60)
 
         return alert, action, text
