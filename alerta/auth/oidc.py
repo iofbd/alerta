@@ -134,8 +134,7 @@ def openid():
             id_token = jwt.decode(
                 token['id_token'],
                 algorithms=jwt_header['alg'],
-                options={'verify_signature': False}
-            )
+                options={'verify_signature': True})
     except Exception:
         current_app.logger.warning('No ID token in OpenID Connect token response.')
         id_token = {}
