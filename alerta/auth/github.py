@@ -9,6 +9,7 @@ from alerta.models.user import User
 from alerta.utils.audit import auth_audit_trail
 
 from . import auth
+from security import safe_requests
 
 
 @auth.route('/auth/github', methods=['OPTIONS', 'POST'])
@@ -39,15 +40,15 @@ def github():
 
     try:
         headers = {'Authorization': f"token {token['access_token']}"}
-        r = requests.get(github_api_url + '/user', headers=headers)
+        r = safe_requests.get(github_api_url + '/user', headers=headers)
         profile = r.json()
     except Exception:
         raise ApiError('No access token in OpenID Connect token response.')
 
-    r = requests.get(github_api_url + '/user/teams', headers=headers)  # list public and private Github orgs
+    r = safe_requests.get(github_api_url + '/user/teams', headers=headers)  # list public and private Github orgs
     profile['teams'] = [f"{t['organization']['login']}/{t['slug']}" for t in r.json()]
 
-    r = requests.get(github_api_url + '/user/orgs', headers=headers)  # list public and private Github orgs
+    r = safe_requests.get(github_api_url + '/user/orgs', headers=headers)  # list public and private Github orgs
     profile['organizations'] = [o['login'] for o in r.json()]
 
     subject = str(profile['id'])
